@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
-from configs import BOARD_LINES, BOARD_COLUMNS, WALLS, WALL_SIZE
+from configs import (BOARD_LINES, BOARD_COLUMNS, WALLS, WALL_SIZE,
+                     BOARD_UNITY_CENTER_X, BOARD_UNITY_CENTER_Y,
+                     BOARD_UNITY_HEIGHT, BOARD_UNITY_WIDTH,
+                     SCREEN_HEIGHT)
+from cocos.layer import Layer
+from sprites import WallSprite
 import random
 
 
-class Board(object):
+class Board(Layer):
     EMPTY = ' '
     WALL = 'W'
 
@@ -11,12 +16,16 @@ class Board(object):
     VERTICAL = 4
 
     def __init__(self):
+        super(Board, self).__init__()
         self.board = []
         self.lines = BOARD_LINES
         self.columns = BOARD_COLUMNS
+        self.walls = []
         self.__initialize_map()
         self.__create_limits()
         self.__create_walls()
+        self.__create_sprites()
+        self.__add_walls()
 
     def __initialize_map(self):
         for line in range(self.lines):
@@ -24,6 +33,21 @@ class Board(object):
             for column in range(self.columns):
                 line.append(self.EMPTY)
             self.board.append(line)
+
+    def __create_sprites(self):
+        for i, line in enumerate(self.board):
+            pos_y = SCREEN_HEIGHT - BOARD_UNITY_CENTER_Y - \
+                (i * BOARD_UNITY_HEIGHT) + 178
+            for j, column in enumerate(line):
+                pos_x = BOARD_UNITY_CENTER_X + (j * BOARD_UNITY_WIDTH) + 195
+
+                if self.board[i][j] == self.WALL:
+                    wall = WallSprite(pos_x, pos_y)
+                    self.walls.append(wall)
+
+    def __add_walls(self):
+        for wall in self.walls:
+            self.add(wall)
 
     def __create_limits(self):
         for line_count, line in enumerate(self.board):
